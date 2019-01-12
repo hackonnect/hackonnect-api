@@ -11,10 +11,11 @@ api = Api(app)
 
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    key = db.Column(db.String(120), nullable = False)
+    key = db.Column(db.String(120), unqiue = True, nullable = False)
     value = db.Column(db.String(120), nullable = False)
 
 db.create_all()
+db.session.delete(Database.query.all())
 db.session.add(Database(key = 'data1', value = 'value1'))
 db.session.add(Database(key = 'data2', value = 'value2'))
 db.session.add(Database(key = 'data3', value = 'value3'))
@@ -41,6 +42,8 @@ class Post(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(data)
         args = parser.parse_args()
+        if Database.query.filter_by(key=data).first():
+            return {'error': 'Entry already exists.'}, 404
         new_entry = Database(key = data, value = args[data])
         db.session.add(new_entry)
         db.session.commit()
@@ -54,11 +57,27 @@ class Put(Resource):
         parser.add_argument(data)
         args = parser.parse_args()
         data_entry = Database.query.filter_by(key=data).first()
-        data_entry.value = args['value']
+        if not data_entry:
+            return {'error': 'Entry does not exist.'}, 404
+        data_entry.value = args[data]
         db.session.commit()
         return {data: args[data]}
         
 api.add_resource(Put, '/put/<string:data>')
+
+class Delete(Resource):
+    def delete(self, data):
+        data_entry = Database.query.filter_by(key=data).first()
+        if not data_entry:
+            return {'error': 'Entry does not exist.'}, 404
+        db.session.delete(data_entry)
+        data_all = Database.query.all()
+        return_data = {}
+        for entry in data_all:
+            return_data[entry.key] = entry.value
+        return return_data
+
+api.add_resource(Delete, '/delete/<string:data>')
 
 @app.route('/')
 def index():
