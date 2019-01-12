@@ -1,4 +1,4 @@
-from flask import Flask, render_template()
+from flask import Flask, render_template
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
