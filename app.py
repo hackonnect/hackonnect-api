@@ -11,7 +11,7 @@ class Intro2Get(Resource):
         return intro_dict
 
 class Intro2GetWithId(Resource):
-    def get(self, data)
+    def get(self, data):
         return {data: intro_dict[data]}
 
 api.add_resource(Intro2Get, '/get')
