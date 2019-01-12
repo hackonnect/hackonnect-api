@@ -15,8 +15,9 @@ class Database(db.Model):
     value = db.Column(db.String(120), nullable = False)
 
 db.create_all()
-for i in range(3):
-    db.session.add(Database(key = 'data' + str(i + 1), value = 'value' + str(i + 1)))
+db.session.add(Database(key = 'data1', value = 'value1'))
+db.session.add(Database(key = 'data2', value = 'value2'))
+db.session.add(Database(key = 'data3', value = 'value3'))
 db.session.commit()
 
 class GetAll(Resource):
