@@ -12,6 +12,8 @@ class Intro2Get(Resource):
 
 class Intro2GetWithId(Resource):
     def get(self, data):
+        if not data in intro_dict:
+            return {'message': 'Data Key not found.'}
         return {data: intro_dict[data]}
 
 api.add_resource(Intro2Get, '/get')
@@ -21,14 +23,14 @@ class Intro2Post(Resource):
     def post(self, data):
         if data in intro_dict:
             return {'message': 'Data Key already exists.'}
-        intro_dict[data] = request.form['data']
+        intro_dict[data] = request.form[data]
         return {data: intro_dict[data]}
 
 api.add_resource(Intro2Post, '/post/<string:data>')
 
 class Intro2Put(Resource):
     def put(self, data):
-        intro_dict[data] = request.form['data']
+        intro_dict[data] = request.form[data]
         return {data: intro_dict[data]}
         
 api.add_resource(Intro2Put, '/put/<string:data>')
