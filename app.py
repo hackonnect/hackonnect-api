@@ -8,6 +8,9 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
 db = SQLAlchemy(app)
 api = Api(app)
+parser = reqparse.RequestParser()
+parser.add_argument('key')
+parser.add_argument('value')
 
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -21,64 +24,53 @@ db.session.add(Database(key = 'data2', value = 'value2'))
 db.session.add(Database(key = 'data3', value = 'value3'))
 db.session.commit()
 
-class GetAll(Resource):
+class API(Resource):
     def get(self):
-        data_all = Database.query.all()
-        return_data = {}
-        for entry in data_all:
-            return_data[entry.key] = entry.value
-        return return_data
-
-class Get(Resource):
-    def get(self, data):
-        data_entry = Database.query.filter_by(key=data).first()
-        return {data_entry.key : data_entry.value}
-
-api.add_resource(GetAll, '/get')
-api.add_resource(Get, '/get/<string:data>')
-
-class Post(Resource):
-    def post(self, data):
-        parser = reqparse.RequestParser()
-        parser.add_argument(data)
         args = parser.parse_args()
-        if Database.query.filter_by(key=data).first():
+        key = args['key']
+        if key:
+            entry = Database.query.filter_by(key=key).first()
+            result = {entry.key, entry.value}
+        else:
+            database = Database.query.all()
+            result = {}
+            for entry in database:
+                result[entry.key] = entry.value
+        return result, 200
+
+    def post(self):
+        args = parser.parse_args()
+        key, value = args['key'], args['value']
+        if Database.query.filter_by(key=key).first():
             return {'error': 'Entry already exists.'}, 404
-        new_entry = Database(key = data, value = args[data])
-        db.session.add(new_entry)
+        entry = Database(key = key, value = value)
+        db.session.add(entry)
         db.session.commit()
-        return {data: args[data]}
+        result = {key, value}
+        return result, 201
 
-api.add_resource(Post, '/post/<string:data>')
-
-class Put(Resource):
-    def put(self, data):
-        parser = reqparse.RequestParser()
-        parser.add_argument(data)
+    def put(self):
         args = parser.parse_args()
-        data_entry = Database.query.filter_by(key=data).first()
-        if not data_entry:
+        key, value = args['key'], args['value']
+        entry = Database.query.filter_by(key=key).first()
+        if not entry:
             return {'error': 'Entry does not exist.'}, 404
-        data_entry.value = args[data]
+        entry.value = value
         db.session.commit()
-        return {data: args[data]}
-        
-api.add_resource(Put, '/put/<string:data>')
+        result = {key, value}
+        return result, 200
 
-class Delete(Resource):
-    def delete(self, data):
-        data_entry = Database.query.filter_by(key=data).first()
-        if not data_entry:
+    def delete(self):
+        args = parser.parse_args()
+        key = args['key']
+        entry = Database.query.filter_by(key=key).first()
+        if not entry:
             return {'error': 'Entry does not exist.'}, 404
-        db.session.delete(data_entry)
+        db.session.delete(entry)
         db.session.commit()
-        data_all = Database.query.all()
-        return_data = {}
-        for entry in data_all:
-            return_data[entry.key] = entry.value
-        return return_data
+        return self.get()
 
-api.add_resource(Delete, '/delete/<string:data>')
+api.add_resource(API, '/api')
 
 @app.route('/')
 def index():
