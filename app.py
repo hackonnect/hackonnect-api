@@ -25,12 +25,12 @@ db.session.add(Database(key = 'data3', value = 'value3'))
 db.session.commit()
 
 class API(Resource):
-    def get(self):
+    def get(self, ignore_key=False):
         args = parser.parse_args()
         key = args['key']
-        if key:
+        if key and not ignore_key:
             entry = Database.query.filter_by(key=key).first()
-            result = {entry.key, entry.value}
+            result = {entry.key: entry.value}
         else:
             database = Database.query.all()
             result = {}
@@ -46,7 +46,7 @@ class API(Resource):
         entry = Database(key = key, value = value)
         db.session.add(entry)
         db.session.commit()
-        result = {key, value}
+        result = {key: value}
         return result, 201
 
     def put(self):
@@ -57,7 +57,7 @@ class API(Resource):
             return {'error': 'Entry does not exist.'}, 404
         entry.value = value
         db.session.commit()
-        result = {key, value}
+        result = {key: value}
         return result, 200
 
     def delete(self):
@@ -68,7 +68,7 @@ class API(Resource):
             return {'error': 'Entry does not exist.'}, 404
         db.session.delete(entry)
         db.session.commit()
-        return self.get()
+        return self.get(ignore_key=True)
 
 api.add_resource(API, '/api')
 
