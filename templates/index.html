@@ -4,14 +4,22 @@
         <title>Hackonnect Practice API</title>
     </head>
     <body>
-        <h1>Table 1: Introduction to Get</h1>
+        <h1>Table 1: Introduction to GET, POST and PUT</h1>
         <table>
-        {% for key, value in intro2get.items() %}
-            <tr>
-                <td>{{ key }}</td>
-                <td>{{ value }}</td>
-            </tr>
-        {% endfor %}
+            <thead>
+                <th>
+                    <td>Data Key</td>
+                    <td>Value</td>
+                </th>
+            </thead>
+            <tbody>
+            {% for key, value in intro_dict.items() %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
         </table>
     </body>
 </html>
