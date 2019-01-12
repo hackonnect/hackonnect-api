@@ -16,7 +16,6 @@ class Database(db.Model):
 
 db.create_all()
 db.session.query(Database).delete()
-db.session.commit()
 db.session.add(Database(key = 'data1', value = 'value1'))
 db.session.add(Database(key = 'data2', value = 'value2'))
 db.session.add(Database(key = 'data3', value = 'value3'))
@@ -72,6 +71,7 @@ class Delete(Resource):
         if not data_entry:
             return {'error': 'Entry does not exist.'}, 404
         db.session.delete(data_entry)
+        db.session.commit()
         data_all = Database.query.all()
         return_data = {}
         for entry in data_all:
