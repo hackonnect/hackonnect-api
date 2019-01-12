@@ -13,10 +13,10 @@
                 </th>
             </thead>
             <tbody>
-            {% for key, value in intro_dict.items() %}
+            {% for entry in database %}
                 <tr>
-                    <td>{{ key }}</td>
-                    <td>{{ value }}</td>
+                    <td>{{ entry.key }}</td>
+                    <td>{{ entry.value }}</td>
                 </tr>
             {% endfor %}
             </tbody>
